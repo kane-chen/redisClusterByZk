@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.kane.redisCluster.hash.ConsistentHash;
+import cn.kane.redisCluster.jedis.JedisClient;
 
 public class ZkRegNode {
 
@@ -36,8 +37,9 @@ public class ZkRegNode {
 	//redis
 	private String redisHost;
 	private int redisPort;
-	@SuppressWarnings("unused")
 	private int redisTimeOut;
+	//instance
+	private JedisClient jedisClient;
 	// node-data
 	private String groupName;
 	private String shardName;
@@ -82,6 +84,7 @@ public class ZkRegNode {
 		this.leaderStandbyWatcher = new LeaderStandbyWatcher();
 		this.shardLeaderWatcher = new ShardLeaderNodeWatcher();
 		zkClient = new ZooKeeper(zkConn, zkSessionTimeOut, watcher);
+		jedisClient = new JedisClient(redisHost, redisPort, redisTimeOut) ;
 		// group-root path
 		if (null == zkClient.exists(groupPath, watcher)) {
 			zkClient.create(groupPath, groupName.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
@@ -121,25 +124,42 @@ public class ZkRegNode {
 
 	private void checkIamShardLeader() throws KeeperException, InterruptedException{
 		boolean amILeader = false ;
-		boolean isLeaderNodeExist = true;
-		boolean isLeaderNodeValid = true;
+		boolean isShardMasterExist = true;
+		boolean isShardMasterValid = true;
+		String shardMaster = null ;
 		if (null == zkClient.exists(shardLeaderDataNode, watcher)) {
-			isLeaderNodeExist = false;
+			isShardMasterExist = false;
 		}
-		if (isLeaderNodeExist) {
+		if (isShardMasterExist) {
 			byte[] leaderNodeBytes = zkClient.getData(shardLeaderDataNode,shardLeaderWatcher, null);
 			if (null == leaderNodeBytes) {
-				isLeaderNodeValid = false;
+				isShardMasterValid = false;
+			}else{
+				shardMaster = new String(leaderNodeBytes) ;
 			}
 		}
-		if (isLeaderNodeExist && isLeaderNodeValid) {
+		if (isShardMasterExist && isShardMasterValid) {
 			LOG.info("i am shard-follower");
+			this.slaveOfMaster(shardMaster);
 		} else {
 			amILeader = this.tryToBeShardLeader();
 		}
 		if(amILeader){
+			jedisClient.beMaster();
 			LOG.info("[GroupLeader]i am shardLeader,and try to be groupLeader");
 			this.checkIamGroupLeader();
+		}
+	}
+	
+	private void slaveOfMaster(String shardMaster){
+		String redisApp = redisHost + ":" + redisPort ;
+		if(!redisApp.equals(shardMaster)){
+			String[] masterArray = shardMaster.split(":") ;
+			String masterHost = masterArray[0] ;
+			int masterPort = Integer.parseInt(masterArray[1]) ;
+			jedisClient.slaveOf(masterHost, masterPort);
+		}else{
+			jedisClient.beMaster();
 		}
 	}
 	
@@ -148,7 +168,8 @@ public class ZkRegNode {
 		boolean amILeader = false ;
 		// beLeader
 		try {
-			zkClient.create(shardLeaderDataNode, nodeName.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+			String redisApp = redisHost + ":" + redisPort ;
+			zkClient.create(shardLeaderDataNode, redisApp.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 			LOG.info("[ToBeShardLeader]-[NEW] i am leader " + nodeName);
 			amILeader = true ;
 		} catch (KeeperException e) {
@@ -236,6 +257,7 @@ public class ZkRegNode {
 				try {
 					String newLeader = new String(zkClient.getData(event.getPath(), false, null));
 					LOG.info("[Leader-Change] newLeader = " + newLeader);
+					
 				} catch (KeeperException e) {
 					e.printStackTrace();
 				} catch (InterruptedException e) {
