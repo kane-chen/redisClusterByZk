@@ -10,6 +10,7 @@ public class RedisAgent {
 	
 	//data
 	private String groupName;
+	private String shardName;
 	private String nodeName;
 	//zookeeper
 	private int zkSessionTimeOut;
@@ -26,7 +27,7 @@ public class RedisAgent {
 	public void startup(){
 		LOG.info(String.format("[Agent] startup : Redis[%s:%s]-Zk[%s]-Data[%s/%s]",redisHost,redisPort,zkConn,groupName,nodeName));
 		//zookeeper-reg
-		this.zkRegNode = new ZkRegNode(groupName, nodeName, zkSessionTimeOut, zkConn, watcher, redisHost, redisPort, redisTimeOut) ;
+		this.zkRegNode = new ZkRegNode(groupName, shardName,nodeName, zkSessionTimeOut, zkConn, watcher, redisHost, redisPort, redisTimeOut) ;
 		//jedis-monitor
 		Runnable monitorRunnable = new JedisMonitorRunnable(redisHost, redisPort, redisTimeOut, zkRegNode);
 		jedisMonitorThread = new Thread(monitorRunnable,groupName+"-"+nodeName);
@@ -107,6 +108,14 @@ public class RedisAgent {
 
 	public void setRedisTimeOut(int redisTimeOut) {
 		this.redisTimeOut = redisTimeOut;
+	}
+
+	public String getShardName() {
+		return shardName;
+	}
+
+	public void setShardName(String shardName) {
+		this.shardName = shardName;
 	}
 
 }
