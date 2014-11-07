@@ -24,10 +24,12 @@ public class RedisAgentTest extends TestCase{
 	};
 
 	public void testRedisAgent(){
-		String nodeName = "Node5";
-		int redisPort = 6384 ;
+		String nodeName = "Node1";
+		int redisPort = 6380 ;
 		redisAgent = new RedisAgent() ;
 		redisAgent.setGroupName("/demo");
+		redisAgent.setShardName("/shard1");
+//		redisAgent.setShardName("/shard2");
 		redisAgent.setNodeName(nodeName);
 		redisAgent.setRedisHost("192.168.56.15");
 		redisAgent.setRedisPort(redisPort);

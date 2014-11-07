@@ -13,5 +13,12 @@ public class JedisClient {
 	public String ping(){
 		return jedis.ping() ;
 	}
+
+	public void slaveOf(String masterHost,int masterPort){
+		jedis.slaveof(masterHost, masterPort) ;
+	}
 	
+	public void beMaster(){
+		jedis.slaveofNoOne() ;
+	}
 }

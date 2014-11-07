@@ -58,7 +58,7 @@ class JedisMonitorRunnable implements Runnable {
 						// zkClient remove
 						try {
 							zkRegNode.unreg();
-						} catch (InterruptedException e) {
+						} catch (Exception e) {
 							LOG.error("[Zk-UnReg] ERROR",e);
 						}
 						LOG.error(String.format("Jedis Monitor[%s:%s] exceed max-reconn times,ping failed with %s",host,port,timeOut));
