@@ -1,0 +1,93 @@
+package cn.kane.redisCluster.zookeeper.watchers;
+
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooDefs;
+import org.apache.zookeeper.ZooKeeper;
+
+import cn.kane.redisCluster.jedis.JedisClient;
+import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
+
+public class ShardLeaderNodeWatcher extends LeaderWatcher {
+
+	private ZooKeeper zkClient;
+	private JedisClient jedisClient ;
+	private String nodeName;
+	private NodeInfo node ;
+
+	public ShardLeaderNodeWatcher(ZooKeeper zkClient,JedisClient jedisClient,NodeInfo node) {
+		this.zkClient = zkClient;
+		this.jedisClient = jedisClient ;
+		this.node = node ;
+		String nodePath = node.getNodePath() ;
+		int startIndex = nodePath.lastIndexOf("/");
+		this.nodeName = nodePath.substring(startIndex);
+	}
+
+	@Override
+	public boolean addWatcher(String leaderPath) {
+		boolean iAmShardLeader = false;
+		boolean isShardMasterExist = true;
+		boolean isShardMasterValid = true;
+		try {
+			String shardMaster = null;
+			if (null == zkClient.exists(leaderPath, this)) {
+				isShardMasterExist = false;
+			}
+			if (isShardMasterExist) {
+				byte[] leaderNodeBytes = zkClient.getData(leaderPath, this,	null);
+				if (null == leaderNodeBytes) {
+					isShardMasterValid = false;
+				} else {
+					shardMaster = new String(leaderNodeBytes);
+				}
+			}
+			if (isShardMasterExist && isShardMasterValid) {
+				LOG.info("i am shard-follower,leader is" + shardMaster);
+				 this.slaveOfMaster(shardMaster);
+			} else {
+				LOG.debug("there's no leader,i try to be");
+				iAmShardLeader = this.tryToBeShardLeader(leaderPath);
+			}
+		} catch (KeeperException e) {
+			LOG.info("checkIAmLeader-keeperException", e);
+		} catch (InterruptedException e) {
+			LOG.info("checkIAmLeader-InterruptedException", e);
+		} finally {
+			try {
+				String newLeader = new String(zkClient.getData(leaderPath,false, null));
+				node.getShard().setShardLeaderNodeName(newLeader);
+				LOG.info("[Leader-Change] newLeader = " + newLeader);
+			} catch (Exception e) {
+				LOG.info("[Leader]finally-error",e);
+			}
+		}
+		return iAmShardLeader ;
+	}
+
+	private boolean tryToBeShardLeader(String leaderPath) throws KeeperException, InterruptedException {
+		LOG.info("[ToBeShardLeader]-start ");
+		// beLeader
+		zkClient.create(leaderPath, nodeName.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+		LOG.info("[ToBeShardLeader]-[NEW] i am leader " + nodeName);
+		jedisClient.beMaster();
+		return true;
+	}
+
+	private void slaveOfMaster(String shardMaster){
+		if(!nodeName.equals(shardMaster)){
+			String[] masterArray = shardMaster.split(":") ;
+			String masterHost = masterArray[0] ;
+			int masterPort = Integer.parseInt(masterArray[1]) ;
+			jedisClient.slaveOf(masterHost, masterPort);
+		}else{
+			jedisClient.beMaster();
+		}
+	}
+	
+	@Override
+	public void addNextWacther() {
+		GroupLeaderNodeWatcher groupLeaderWatcher = new GroupLeaderNodeWatcher(zkClient, node);
+		groupLeaderWatcher.addWatcher(node.getGroup().getGroupLeaderPath());
+	}
+}
