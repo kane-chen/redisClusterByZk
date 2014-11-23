@@ -5,19 +5,19 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 
-import cn.kane.redisCluster.jedis.JedisClient;
+import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
 
 public class ShardLeaderNodeWatcher extends LeaderWatcher {
 
 	private ZooKeeper zkClient;
-	private JedisClient jedisClient ;
+	private ICacheManageInterface cacheMan ;
 	private String nodeName;
 	private NodeInfo node ;
 
-	public ShardLeaderNodeWatcher(ZooKeeper zkClient,JedisClient jedisClient,NodeInfo node) {
+	public ShardLeaderNodeWatcher(ZooKeeper zkClient,ICacheManageInterface cacheMan,NodeInfo node) {
 		this.zkClient = zkClient;
-		this.jedisClient = jedisClient ;
+		this.cacheMan = cacheMan ;
 		this.node = node ;
 		String nodePath = node.getNodePath() ;
 		int startIndex = nodePath.lastIndexOf("/");
@@ -70,7 +70,7 @@ public class ShardLeaderNodeWatcher extends LeaderWatcher {
 		// beLeader
 		zkClient.create(leaderPath, nodeName.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 		LOG.info("[ToBeShardLeader]-[NEW] i am leader " + nodeName);
-		jedisClient.beMaster();
+		cacheMan.beMaster();
 		return true;
 	}
 
@@ -79,9 +79,9 @@ public class ShardLeaderNodeWatcher extends LeaderWatcher {
 			String[] masterArray = shardMaster.split(":") ;
 			String masterHost = masterArray[0] ;
 			int masterPort = Integer.parseInt(masterArray[1]) ;
-			jedisClient.slaveOf(masterHost, masterPort);
+			cacheMan.slaveOf(masterHost, masterPort);
 		}else{
-			jedisClient.beMaster();
+			cacheMan.beMaster();
 		}
 	}
 	
