@@ -17,7 +17,7 @@ public class ShardInfo implements Serializable{
 	
 	public ShardInfo(String shardName,GroupInfo group){
 		this.group = group ;
-		this.shardPath = group.getGroupPath() + "/" + shardName + "/" ;
+		this.shardPath = group.getGroupPath() + "/" + shardName ;
 		this.shardLeaderPath = this.shardPath + ZkNodeConstant.LEADER_NODE ;
 	}
 	

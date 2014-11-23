@@ -5,20 +5,13 @@ import java.io.IOException;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
-
-
-
-
-//import cn.kane.redisCluster.LeaderElectionNode;
 import cn.kane.redisCluster.election.LeaderElectionNode4Alltry;
 import cn.kane.redisCluster.election.LeaderElectionNode4Ephemeral;
 import cn.kane.redisCluster.jedis.JedisClient;
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 public class NodeElectionSingletonTest extends TestCase {

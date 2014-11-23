@@ -17,10 +17,10 @@ public class GroupInfo implements Serializable{
 	private String leaderNodeName ;
 	
 	public GroupInfo(String groupPath){
-		this.groupPath = groupPath + "/" ;
+		this.groupPath = "/" + groupPath  ;
 		this.groupLeaderPath = this.groupPath + ZkNodeConstant.LEADER_NODE ;
-		this.childsRootPath = groupPath + ZkNodeConstant.CHILDREN_PATH ;
-		this.livingDataNode = groupPath + ZkNodeConstant.LIVEINGS_DATAS_NODE ;
+		this.childsRootPath = this.groupPath + ZkNodeConstant.CHILDREN_PATH ;
+		this.livingDataNode = this.groupPath + ZkNodeConstant.LIVEINGS_DATAS_NODE ;
 	}
 	
 	public String getGroupPath() {

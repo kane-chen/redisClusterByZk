@@ -63,7 +63,7 @@ public class NodeFactory {
 	private GroupInfo createGroup(String groupName,ZooKeeper zkClient) throws KeeperException, InterruptedException{
 		GroupInfo group = new GroupInfo(groupName) ;
 		String groupPath = group.getGroupPath();
-		String groupNodesDataNode = group.getLeaderNodeName();
+		String groupNodesDataNode = group.getChildsRootPath();
 		String livingsDataNode = group.getLivingDataNode();
 		// group-root path
 		if (null == zkClient.exists(groupPath, null)) {

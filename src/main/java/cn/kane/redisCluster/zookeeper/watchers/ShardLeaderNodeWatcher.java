@@ -68,7 +68,7 @@ public class ShardLeaderNodeWatcher extends LeaderWatcher {
 	private boolean tryToBeShardLeader(String leaderPath) throws KeeperException, InterruptedException {
 		LOG.info("[ToBeShardLeader]-start ");
 		// beLeader
-		zkClient.create(leaderPath, nodeName.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+		zkClient.create(leaderPath, cacheMan.cacheServerInfo().getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 		LOG.info("[ToBeShardLeader]-[NEW] i am leader " + nodeName);
 		cacheMan.beMaster();
 		return true;
