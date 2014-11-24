@@ -50,7 +50,9 @@ public class CacheMonitorRunnable implements Runnable {
 						LOG.info(String.format("[Monitor] exceed max-reconn times [%s]",cacheMan.cacheServerInfo()));
 						// zkClient remove
 						try {
-							nodeInfo.unReg();
+							if(nodeInfo.isWorking()){
+								nodeInfo.unReg();
+							}
 						} catch (Exception e) {
 							LOG.error("[Zk-UnReg] ERROR",e);
 						}

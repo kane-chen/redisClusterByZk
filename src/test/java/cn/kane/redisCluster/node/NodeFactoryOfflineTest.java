@@ -1,4 +1,4 @@
-package cn.kane.redisCluster.agent;
+package cn.kane.redisCluster.node;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import junit.framework.TestCase;
 
-public class NodeFactoryTest extends TestCase {
+public class NodeFactoryOfflineTest extends TestCase {
 
 	ApplicationContext appContext = new ClassPathXmlApplicationContext("applicationContext-test.xml");
 
