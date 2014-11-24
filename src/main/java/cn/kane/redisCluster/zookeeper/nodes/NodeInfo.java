@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.cache.monitor.CacheMonitorRunnable;
+import cn.kane.redisCluster.zookeeper.watchers.LogBaseWatcher;
 import cn.kane.redisCluster.zookeeper.watchers.ShardLeaderNodeWatcher;
 
 public class NodeInfo implements Serializable{
@@ -38,7 +39,6 @@ public class NodeInfo implements Serializable{
 	
 	public NodeInfo(String nodeName,GroupInfo group,ShardInfo shard,ZooKeeper zkClient,String zkConnStr,int zkSessionTimeout,ICacheManageInterface cacheMan){
 		this.nodeName = nodeName ;
-		this.nodePath = shard.getShardPath()+ "/" + nodeName ;
 		this.shard = shard ;
 		this.group = group ;
 		this.zkClient = zkClient ;
@@ -64,7 +64,7 @@ public class NodeInfo implements Serializable{
 	public void reg() throws KeeperException, InterruptedException{
 		this.checkZkClientConn();
 		//create node
-		String nodePath = zkClient.create(shard.getShardPath(),
+		this.nodePath = zkClient.create(shard.getShardPath()+"/",
 				nodeName.getBytes(), ZooDefs.Ids.READ_ACL_UNSAFE,CreateMode.EPHEMERAL_SEQUENTIAL);
 		LOG.info(String.format("[Node] created [%s]",nodePath));
 		//add-watcher
@@ -86,7 +86,7 @@ public class NodeInfo implements Serializable{
 				LOG.error("[Zk]close not-alive conn error",e1);
 			}
 			try {
-				zkClient = new ZooKeeper(zkConnStr, zkSessionTimeout, null);
+				zkClient = new ZooKeeper(zkConnStr, zkSessionTimeout, new LogBaseWatcher());
 			} catch (IOException e1) {
 				LOG.error("[Zk]init conn error",e1);
 			}

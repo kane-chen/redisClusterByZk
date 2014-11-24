@@ -10,7 +10,7 @@ public class CacheMonitorRunnable implements Runnable {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CacheMonitorRunnable.class) ;
 	//constant
-	private final static Long MONITOR_INTERRAL = 3000L;
+	private final static Long MONITOR_INTERRAL = 20000L;
 	private final static int MONITOR_MAX_FAIL_TIMES = 3;
 	private ICacheManageInterface cacheMan;
 	private NodeInfo nodeInfo ;

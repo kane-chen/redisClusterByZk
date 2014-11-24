@@ -43,7 +43,7 @@ public class ShardLeaderNodeWatcher extends LeaderWatcher {
 				}
 			}
 			if (isShardMasterExist && isShardMasterValid) {
-				LOG.info("i am shard-follower,leader is" + shardMaster);
+				LOG.info("i am shard-follower,leader is " + shardMaster);
 				 this.slaveOfMaster(shardMaster);
 			} else {
 				LOG.debug("there's no leader,i try to be");
@@ -75,7 +75,7 @@ public class ShardLeaderNodeWatcher extends LeaderWatcher {
 	}
 
 	private void slaveOfMaster(String shardMaster){
-		if(!nodeName.equals(shardMaster)){
+		if(!cacheMan.cacheServerInfo().equals(shardMaster)){
 			String[] masterArray = shardMaster.split(":") ;
 			String masterHost = masterArray[0] ;
 			int masterPort = Integer.parseInt(masterArray[1]) ;

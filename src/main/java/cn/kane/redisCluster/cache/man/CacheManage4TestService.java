@@ -25,7 +25,7 @@ public class CacheManage4TestService implements ICacheManageInterface {
 
 	@Override
 	public void slaveOf(String masterHost, int port) {
-		LOG.info(String.format("[CacheMan] [%s:%s] be slaveOf [%s:%s]",host,port,masterHost,port));
+		LOG.info(String.format("[CacheMan] [%s:%s] be slaveOf [%s:%s]",this.host,this.port,masterHost,port));
 	}
 
 	@Override

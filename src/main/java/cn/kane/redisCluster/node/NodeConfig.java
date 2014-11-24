@@ -9,6 +9,7 @@ import org.apache.zookeeper.ZooKeeper;
 import cn.kane.redisCluster.cache.man.CacheManage4TestService;
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.cache.man.JedisCacheManageService;
+import cn.kane.redisCluster.zookeeper.watchers.LogBaseWatcher;
 
 public class NodeConfig {
 	//node
@@ -27,12 +28,12 @@ public class NodeConfig {
 	private ICacheManageInterface cacheMan ;
 	
 	public void init() throws IOException{
-		zkClient = new ZooKeeper(zkConnStr, zkSessionTimeOut, null);
+		zkClient = new ZooKeeper(zkConnStr, zkSessionTimeOut, new LogBaseWatcher());
 		cacheMan = new JedisCacheManageService(cacheHost,cachePort,cacheTimeout);
 	}
 	
 	public void init4Test()throws IOException{
-		zkClient = new ZooKeeper(zkConnStr, zkSessionTimeOut, null);
+		zkClient = new ZooKeeper(zkConnStr, zkSessionTimeOut, new LogBaseWatcher());
 		cacheMan = new CacheManage4TestService(cacheHost,cachePort,cacheTimeout);
 	}
 	
