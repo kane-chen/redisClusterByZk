@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import junit.framework.TestCase;
 
+@Deprecated
 public class RedisAgentTest extends TestCase{
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RedisAgentTest.class) ;
