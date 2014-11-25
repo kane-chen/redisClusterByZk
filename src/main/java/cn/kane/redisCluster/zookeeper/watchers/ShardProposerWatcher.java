@@ -8,14 +8,14 @@ import org.apache.zookeeper.ZooKeeper;
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
 
-public class ShardLeaderNodeWatcher extends LeaderWatcher {
+public class ShardProposerWatcher extends LeaderWatcher {
 
 	private ZooKeeper zkClient;
 	private ICacheManageInterface cacheMan ;
 	private String nodeName;
 	private NodeInfo node ;
 
-	public ShardLeaderNodeWatcher(ZooKeeper zkClient,ICacheManageInterface cacheMan,NodeInfo node) {
+	public ShardProposerWatcher(ZooKeeper zkClient,ICacheManageInterface cacheMan,NodeInfo node) {
 		this.zkClient = zkClient;
 		this.cacheMan = cacheMan ;
 		this.node = node ;
@@ -87,7 +87,7 @@ public class ShardLeaderNodeWatcher extends LeaderWatcher {
 	
 	@Override
 	public void addNextWacther() {
-		GroupLeaderNodeWatcher groupLeaderWatcher = new GroupLeaderNodeWatcher(zkClient, node);
+		ShardLeaderWatcher groupLeaderWatcher = new ShardLeaderWatcher(zkClient, node);
 		groupLeaderWatcher.addWatcher(node.getGroup().getGroupLeaderPath());
 	}
 }

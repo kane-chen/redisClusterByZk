@@ -7,13 +7,13 @@ import org.apache.zookeeper.ZooKeeper;
 
 import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
 
-public class GroupLeaderNodeWatcher extends LeaderWatcher {
+public class ShardLeaderWatcher extends LeaderWatcher {
 
 	private ZooKeeper zkClient;
 	private String nodeName;
 	private NodeInfo node ;
 
-	public GroupLeaderNodeWatcher(ZooKeeper zkClient,NodeInfo node) {
+	public ShardLeaderWatcher(ZooKeeper zkClient,NodeInfo node) {
 		this.zkClient = zkClient;
 		this.node = node ;
 		String nodePath = node.getNodePath() ;
@@ -70,7 +70,7 @@ public class GroupLeaderNodeWatcher extends LeaderWatcher {
 	
 	@Override
 	public void addNextWacther() {
-		LivingNodesWatcher livingNodesWatcher = new LivingNodesWatcher(zkClient,nodeName ) ;
+		GroupLeaderWatcher livingNodesWatcher = new GroupLeaderWatcher(zkClient,nodeName ) ;
 		livingNodesWatcher.addWatcher(node.getGroup().getLivingDataNode()) ;
 	}
 

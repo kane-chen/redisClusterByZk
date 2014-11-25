@@ -10,12 +10,12 @@ import org.apache.zookeeper.ZooKeeper;
 import cn.kane.redisCluster.zookeeper.nodes.LivingNodeVO;
 import cn.kane.redisCluster.zookeeper.nodes.ZkNodeConstant;
 
-public class LivingNodesWatcher extends LeaderWatcher {
+public class GroupLeaderWatcher extends LeaderWatcher {
 
 	private static final int ANY_VERSION = -1 ;
 	private ZooKeeper zkClient;
 
-	public LivingNodesWatcher(ZooKeeper zkClient, String nodeName) {
+	public GroupLeaderWatcher(ZooKeeper zkClient, String nodeName) {
 		this.zkClient = zkClient;
 	}
 	

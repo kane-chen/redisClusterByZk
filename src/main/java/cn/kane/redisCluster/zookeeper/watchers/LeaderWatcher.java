@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class LeaderWatcher implements Watcher {
 
-	protected static final Logger LOG = LoggerFactory.getLogger(ShardLeaderNodeWatcher.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(LeaderWatcher.class);
 	
 	@Override
 	public void process(WatchedEvent event) {

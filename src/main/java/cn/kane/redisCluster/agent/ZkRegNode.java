@@ -15,6 +15,12 @@ import org.slf4j.LoggerFactory;
 import cn.kane.redisCluster.hash.ConsistentHash;
 import cn.kane.redisCluster.jedis.JedisClient;
 
+/**
+ * replace with NodeInfo
+ * @author chenqingxiang
+ *
+ */
+@Deprecated
 public class ZkRegNode {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ZkRegNode.class);

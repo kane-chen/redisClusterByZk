@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.cache.monitor.CacheMonitorRunnable;
 import cn.kane.redisCluster.zookeeper.watchers.LogBaseWatcher;
-import cn.kane.redisCluster.zookeeper.watchers.ShardLeaderNodeWatcher;
+import cn.kane.redisCluster.zookeeper.watchers.ShardProposerWatcher;
 
 public class NodeInfo implements Serializable{
 
@@ -86,7 +86,7 @@ public class NodeInfo implements Serializable{
 						nodeName.getBytes(), ZooDefs.Ids.READ_ACL_UNSAFE,CreateMode.EPHEMERAL_SEQUENTIAL);
 				LOG.info(String.format("[Node] created [%s]",nodePath));
 				//add-watcher
-				ShardLeaderNodeWatcher shardLeaderWatcher = new ShardLeaderNodeWatcher(zkClient,cacheMan,this);
+				ShardProposerWatcher shardLeaderWatcher = new ShardProposerWatcher(zkClient,cacheMan,this);
 				shardLeaderWatcher.addWatcher(shard.getShardLeaderPath());
 				isWorking.set(true);
 				return ;
