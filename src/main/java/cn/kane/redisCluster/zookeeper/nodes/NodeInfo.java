@@ -23,6 +23,8 @@ public class NodeInfo implements Serializable{
 	private static final long serialVersionUID = -3322602428503004271L;
 	private static final Logger LOG = LoggerFactory.getLogger(NodeInfo.class) ;
 	
+	private static final int ZK_CONN_MAX_RETRY_TIME = 1 ;
+	
 	private GroupInfo group ;
 	private ShardInfo shard ;
 
@@ -42,6 +44,8 @@ public class NodeInfo implements Serializable{
 		this.shard = shard ;
 		this.group = group ;
 		this.zkClient = zkClient ;
+		this.zkConnStr = zkConnStr ;
+		this.zkSessionTimeout = zkSessionTimeout ;
 		this.cacheMan = cacheMan ;
 	}
 	
@@ -62,33 +66,46 @@ public class NodeInfo implements Serializable{
 	}
 	
 	public void reg() throws KeeperException, InterruptedException{
-		this.checkZkClientConn();
-		//create node
-		this.nodePath = zkClient.create(shard.getShardPath()+"/",
-				nodeName.getBytes(), ZooDefs.Ids.READ_ACL_UNSAFE,CreateMode.EPHEMERAL_SEQUENTIAL);
-		LOG.info(String.format("[Node] created [%s]",nodePath));
-		//add-watcher
-		ShardLeaderNodeWatcher shardLeaderWatcher = new ShardLeaderNodeWatcher(zkClient,cacheMan,this);
-		shardLeaderWatcher.addWatcher(shard.getShardLeaderPath());
-		isWorking.set(true);
+		//check cache-conn
+		if(!"OK".equals(cacheMan.ping())){
+			LOG.warn(String.format("[Cache] ping failed [%s] ", cacheMan));
+			return ;
+		}
+		//zk-create
+		this.createZkNodeInfos();
+		
 	}
 	
-	private void checkZkClientConn(){
-		try{
-			if(zkClient.getState().isAlive()){
-				return ;
-			}
-		}catch(Exception e){
-			LOG.warn(String.format("[Node] zkClient-connection not-alive"),e);
+	private void createZkNodeInfos(){
+		int retryTimes = 1 ; 
+		while(retryTimes <= ZK_CONN_MAX_RETRY_TIME){
 			try{
-				zkClient.close();
-			}catch(Exception e1){
-				LOG.error("[Zk]close not-alive conn error",e1);
-			}
-			try {
-				zkClient = new ZooKeeper(zkConnStr, zkSessionTimeout, new LogBaseWatcher());
-			} catch (IOException e1) {
-				LOG.error("[Zk]init conn error",e1);
+				//create node
+				//TODO PERSISTENCE_NODE(for zk-disconnected)
+				this.nodePath = zkClient.create(shard.getShardPath()+"/",
+						nodeName.getBytes(), ZooDefs.Ids.READ_ACL_UNSAFE,CreateMode.EPHEMERAL_SEQUENTIAL);
+				LOG.info(String.format("[Node] created [%s]",nodePath));
+				//add-watcher
+				ShardLeaderNodeWatcher shardLeaderWatcher = new ShardLeaderNodeWatcher(zkClient,cacheMan,this);
+				shardLeaderWatcher.addWatcher(shard.getShardLeaderPath());
+				isWorking.set(true);
+				return ;
+			}catch(Exception e){
+				//retryTimes
+				retryTimes++ ;
+				LOG.warn(String.format("[Node] zkClient-connection not-alive"),e);
+				//close first
+				try{
+					zkClient.close();
+				}catch(Exception e1){
+					LOG.error("[Zk]close not-alive conn error",e1);
+				}
+				//reconn
+				try {
+					zkClient = new ZooKeeper(zkConnStr, zkSessionTimeout, new LogBaseWatcher());
+				} catch (IOException e1) {
+					LOG.error("[Zk]init conn error",e1);
+				}
 			}
 		}
 		

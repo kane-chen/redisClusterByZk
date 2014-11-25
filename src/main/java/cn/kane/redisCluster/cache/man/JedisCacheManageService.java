@@ -23,7 +23,7 @@ public class JedisCacheManageService implements ICacheManageInterface {
 	
 	@Override
 	public String ping() {
-		LOG.debug(String.format("[Jedis]ping %s",this.cacheServerInfo()));
+		LOG.debug(String.format("[Jedis]ping %s , timeOut= %s",this.cacheServerInfo(),timeOut));
 		String result = jedis.ping() ;
 		if("PONG".equals(result)){
 			return "OK";
@@ -47,10 +47,12 @@ public class JedisCacheManageService implements ICacheManageInterface {
 	@Override
 	public void reConn() {
 		LOG.debug(String.format("[CacheMan]reconn %s",this.cacheServerInfo()));
-		if(jedis.isConnected()){
-			LOG.warn(String.format("[CacheMan]is already connected[%s]",this.cacheServerInfo()));
-		}else{
-			this.jedis = new Jedis(host,port,timeOut);
+		try{
+			jedis.disconnect();
+		}catch(Exception e){
+			LOG.warn(String.format("[CacheMan]disconnect-error [%s]",this.cacheServerInfo()),e);
+		}finally{
+			jedis.connect();
 		}
 	}
 
@@ -58,5 +60,10 @@ public class JedisCacheManageService implements ICacheManageInterface {
 	public String cacheServerInfo() {
 		String serverInfo = host+":"+port ;
 		return serverInfo;
+	}
+	
+	@Override
+	public String toString(){
+		return this.cacheServerInfo();
 	}
 }

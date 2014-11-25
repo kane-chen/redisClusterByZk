@@ -32,7 +32,11 @@ public class CacheMonitorRunnable implements Runnable {
 					pingResult = cacheMan.ping();
 				} catch (Exception e) {
 					LOG.error(String.format("[Monitor]error [%s]",cacheMan.cacheServerInfo()), e);
-					cacheMan.reConn();
+					try{
+						cacheMan.reConn();
+					}catch(Exception e1){
+						LOG.error(String.format("[Monitor]reconn-error [%s]",cacheMan.cacheServerInfo()), e1);
+					}
 				}
 				if ("OK".equals(pingResult)) {
 					LOG.info(String.format("[Monitor] ping success [%s]",cacheMan.cacheServerInfo()));
