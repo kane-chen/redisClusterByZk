@@ -5,20 +5,15 @@ import java.io.IOException;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
-
-
-
-
-//import cn.kane.redisCluster.LeaderElectionNode;
 import cn.kane.redisCluster.election.LeaderElectionNode4Alltry;
 import cn.kane.redisCluster.election.LeaderElectionNode4Ephemeral;
-import cn.kane.redisCluster.jedis.JedisClient;
-import junit.framework.Assert;
+import cn.kane.redisCluster.cache.man.ICacheManageInterface;
+import cn.kane.redisCluster.cache.man.JedisCacheManageService;
+
 import junit.framework.TestCase;
 
 public class NodeElectionSingletonTest extends TestCase {
@@ -54,7 +49,7 @@ public class NodeElectionSingletonTest extends TestCase {
 		String host = "192.168.56.15";
 		int port = 6381 ;
 		int timeOut = 5000;
-		JedisClient jedisClient = new JedisClient(host,port,timeOut);
+		ICacheManageInterface jedisClient = new JedisCacheManageService(host,port,timeOut);
 		Assert.assertEquals("PONG",jedisClient.ping());
 	}
 }

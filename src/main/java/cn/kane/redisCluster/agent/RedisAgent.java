@@ -3,7 +3,13 @@ package cn.kane.redisCluster.agent;
 import org.apache.zookeeper.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * redisAgent: one redis-instance mapping one agent ;
+ * replace with NodeFactory
+ * @author chenqingxiang
+ *
+ */
+@Deprecated
 public class RedisAgent {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RedisAgent.class) ;

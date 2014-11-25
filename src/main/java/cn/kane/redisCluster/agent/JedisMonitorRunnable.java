@@ -5,6 +5,12 @@ import org.slf4j.LoggerFactory;
 
 import cn.kane.redisCluster.jedis.JedisClient;
 
+/**
+ * replace with CacheMonitorRunnable
+ * @author chenqingxiang
+ *
+ */
+@Deprecated
 class JedisMonitorRunnable implements Runnable {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(JedisMonitorRunnable.class) ;

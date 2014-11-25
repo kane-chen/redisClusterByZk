@@ -2,6 +2,12 @@ package cn.kane.redisCluster.jedis;
 
 import redis.clients.jedis.Jedis;
 
+/**
+ * replace with JedisCacheManageService
+ * @author chenqingxiang
+ *
+ */
+@Deprecated
 public class JedisClient {
 
 	private Jedis jedis ;
