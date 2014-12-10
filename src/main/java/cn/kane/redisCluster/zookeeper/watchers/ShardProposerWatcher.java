@@ -1,11 +1,15 @@
 package cn.kane.redisCluster.zookeeper.watchers;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
+import cn.kane.redisCluster.node.NodeRunningInfos;
 import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
 
 public class ShardProposerWatcher extends LeaderWatcher {
@@ -68,20 +72,33 @@ public class ShardProposerWatcher extends LeaderWatcher {
 	private boolean tryToBeShardLeader(String leaderPath) throws KeeperException, InterruptedException {
 		LOG.info("[ToBeShardLeader]-start ");
 		// beLeader
-		zkClient.create(leaderPath, cacheMan.cacheServerInfo().getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+		zkClient.create(leaderPath, node.getNodeKey().getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 		LOG.info("[ToBeShardLeader]-[NEW] i am leader " + nodeName);
 		cacheMan.beMaster();
+		//refresh shardLeader
+		node.getShard().setShardLeaderNodeName(node.getNodeKey());
 		return true;
 	}
 
 	private void slaveOfMaster(String shardMaster){
-		if(!cacheMan.cacheServerInfo().equals(shardMaster)){
-			String[] masterArray = shardMaster.split(":") ;
-			String masterHost = masterArray[0] ;
-			int masterPort = Integer.parseInt(masterArray[1]) ;
+		Map<String,Object> masterCacheInfo = null ;
+		NodeInfo masterNode = NodeRunningInfos.getNodeInfoByKey(node.getNodeKey()) ;
+		if(null!=masterNode){
+			masterCacheInfo = masterNode.getCacheConnInfo() ;
+		}
+		if(!node.getNodeKey().equals(shardMaster)|| !node.getCacheConnInfo().equals(masterCacheInfo)){
+			String masterHost = (String)masterCacheInfo.get("ip") ;
+			int masterPort = (Integer)masterCacheInfo.get("port") ;
 			cacheMan.slaveOf(masterHost, masterPort);
+			//add to slaves
+			Set<String> slaves = node.getShard().getShardFollowerNodeName() ;
+			if(!slaves.contains(node.getNodeKey())){
+				slaves.add(node.getNodeKey()) ;
+			}
 		}else{
 			cacheMan.beMaster();
+			//refresh shardLeader
+			node.getShard().setShardLeaderNodeName(node.getNodeKey());
 		}
 	}
 	

@@ -9,6 +9,7 @@ public class GroupInfo implements Serializable{
 
 	private static final long serialVersionUID = -875689289231227865L;
 	
+	private String groupName ;
 	private String groupPath ;
 	private String groupLeaderPath ;
 	private String childsRootPath ;
@@ -16,11 +17,16 @@ public class GroupInfo implements Serializable{
 	
 	private String leaderNodeName ;
 	
-	public GroupInfo(String groupPath){
+	public GroupInfo(String groupName){
+		this.groupName = groupName ;
 		this.groupPath = "/" + groupPath  ;
 		this.groupLeaderPath = this.groupPath + ZkNodeConstant.LEADER_NODE ;
 		this.childsRootPath = this.groupPath + ZkNodeConstant.CHILDREN_PATH ;
 		this.livingDataNode = this.groupPath + ZkNodeConstant.LIVEINGS_DATAS_NODE ;
+	}
+	
+	public String getGroupName() {
+		return groupName;
 	}
 	
 	public String getGroupPath() {

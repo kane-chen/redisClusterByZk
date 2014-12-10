@@ -1,8 +1,6 @@
 package cn.kane.redisCluster.node;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -19,9 +17,10 @@ import cn.kane.redisCluster.zookeeper.nodes.ShardInfo;
 public class NodeFactory {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NodeFactory.class);
-	private static final String NODE_INFO_KEY_SPLITOR = "##" ;
+	
+	/* input */
 	private List<NodeConfig> nodeConfigs ;
-	private Map<String,NodeInfo> nodeInfos ;
+	
 	
 	public void startup(){
 		LOG.info("[NodeFactory]startuping");
@@ -29,25 +28,18 @@ public class NodeFactory {
 			LOG.warn("[NodeFactory]no node configs!!");
 			return ;
 		}
-		nodeInfos = new ConcurrentHashMap<String, NodeInfo>() ;
+		//node initialing
 		for(NodeConfig nodeConfig : nodeConfigs){
 			try{
 				NodeInfo nodeInfo = this.createNode(nodeConfig);
-				StringBuffer nodeInfoKey = new StringBuffer() ;
-				nodeInfoKey.append(nodeConfig.getGroupName()).append(NODE_INFO_KEY_SPLITOR)
-						   .append(nodeConfig.getShardName()).append(NODE_INFO_KEY_SPLITOR)
-						   .append(nodeConfig.getNodeName()).append(NODE_INFO_KEY_SPLITOR);
-				nodeInfos.put(nodeInfoKey.toString(), nodeInfo);
+				LOG.info(String.format("[Node]created: %s", nodeInfo));
 			}catch(Exception e){
 				LOG.error(String.format("[NodeFactory]create-node-error:%s",nodeConfig),e);
 			}
 		}
 	}
 	
-	public void printNodeInfos(){
-		LOG.info(String.format("[Node-Infos]:%s",nodeInfos));
-	}
-	
+	//create Node entrance
 	public NodeInfo createNode(NodeConfig nodeConfig) throws KeeperException, InterruptedException{
 		String groupName = nodeConfig.getGroupName();
 		String shardName = nodeConfig.getShardName();
@@ -85,6 +77,8 @@ public class NodeFactory {
 		// shard-root path
 		if (null == zkClient.exists(shardPath, null)) {
 			zkClient.create(shardPath, shardName.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			//shard-mapping
+			NodeRunningInfos.addShard(shard);
 		}
 		return shard ;
 	}
@@ -93,6 +87,8 @@ public class NodeFactory {
 		int zkSessionTimeout = nodeConfig.getZkSessionTimeOut() ;
 		NodeInfo node = new NodeInfo(nodeName,group,shard,zkClient,zkConnStr,zkSessionTimeout,cacheMan);
 		node.build();
+		//shard-mapping
+		NodeRunningInfos.addNode(node);
 		return node ;
 	}
 
@@ -103,4 +99,5 @@ public class NodeFactory {
 	public void setNodeConfigs(List<NodeConfig> nodeConfigs) {
 		this.nodeConfigs = nodeConfigs;
 	}
+	
 }

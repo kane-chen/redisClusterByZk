@@ -14,7 +14,8 @@ public class ConsistentHashTest extends TestCase {
 		nodeList.add("Node-1");
 		nodeList.add("Node-2");
 		nodeList.add("Node-3");
-		ConsistentHash<String> conHash = new ConsistentHash<String>(HashAlgorithmEnum.KETAMA_HASH, replicasNum, nodeList) ;
+		ConsistentHash<String> conHash = new ConsistentHash<String>(HashAlgorithmEnum.KETAMA_HASH,
+				HashAlgorithmEnum.FNV_HASH, replicasNum, nodeList) ;
 		System.out.println(conHash.getNodeHashDesc());
 		conHash.add("Node-4");
 		System.out.println(conHash.getNodeHashDesc());

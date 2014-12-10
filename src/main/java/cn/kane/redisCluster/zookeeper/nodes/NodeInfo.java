@@ -2,8 +2,11 @@ package cn.kane.redisCluster.zookeeper.nodes;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.zookeeper.CreateMode;
@@ -15,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.cache.monitor.CacheMonitorRunnable;
+import cn.kane.redisCluster.node.NodeRunningInfos;
 import cn.kane.redisCluster.zookeeper.watchers.LogBaseWatcher;
 import cn.kane.redisCluster.zookeeper.watchers.ShardProposerWatcher;
 
@@ -29,6 +33,7 @@ public class NodeInfo implements Serializable{
 	private ShardInfo shard ;
 
 	private String nodeName ;
+	private String nodeKey ;
 	private String nodePath ;
 	private boolean isShardLeader ;
 	private boolean isGroupLeader ;
@@ -41,6 +46,7 @@ public class NodeInfo implements Serializable{
 	
 	public NodeInfo(String nodeName,GroupInfo group,ShardInfo shard,ZooKeeper zkClient,String zkConnStr,int zkSessionTimeout,ICacheManageInterface cacheMan){
 		this.nodeName = nodeName ;
+		this.nodeKey = shard.getShardKey() + NodeRunningInfos.NODE_INFO_KEY_SPLITOR + nodeName ;
 		this.shard = shard ;
 		this.group = group ;
 		this.zkClient = zkClient ;
@@ -119,6 +125,27 @@ public class NodeInfo implements Serializable{
 		LOG.info(String.format("[Node] unreg done [%s]",this));
 	}
 	
+	public Map<String,Object> getCacheConnInfo(){
+		Map<String,Object> cacheConnInfo = null ;
+		String cacheServerInfo = cacheMan.cacheServerInfo() ;
+		if(StringUtils.isNoneBlank(cacheServerInfo)){
+			String[] infos = cacheServerInfo.split(":") ;
+			if(infos.length == 2){
+				cacheConnInfo = new HashMap<String,Object>() ;
+				cacheConnInfo.put("ip", infos[0]) ;
+				cacheConnInfo.put("port", Integer.parseInt(infos[1]));
+			}
+		}
+		return cacheConnInfo ;
+	}
+	
+
+	public String getNodeName() {
+		return nodeName;
+	}
+	public String getNodeKey() {
+		return nodeKey;
+	}
 	public String getNodePath() {
 		return nodePath;
 	}

@@ -13,8 +13,10 @@ import java.util.TreeMap;
  * @param <T>	节点类型
  */
 public class ConsistentHash<T> {
-	/** Hash计算对象，用于自定义hash算法 */
-	HashAlgorithmEnum hashFunc;
+	/** Hash计算对象，用于自定义hash算法 (对cacheServer进行一致性hash)*/
+	HashAlgorithmEnum cacheServerHashFunc;
+	/** Hash计算对象，用于自定义hash算法 (对Object计算hash值)*/
+	HashAlgorithmEnum cacheObjHashFunc;
 	/** 复制的节点个数 */
 	private final int numberOfReplicas;
 	/** 一致性Hash环 */
@@ -26,10 +28,12 @@ public class ConsistentHash<T> {
 	 */
 	public ConsistentHash(int numberOfReplicas, Collection<T> nodes) {
 		this.numberOfReplicas = numberOfReplicas;
-		this.hashFunc = HashAlgorithmEnum.KETAMA_HASH;
-		//初始化节点
-		for (T node : nodes) {
-			add(node);
+		this.cacheServerHashFunc = HashAlgorithmEnum.KETAMA_HASH;
+		if(null!=nodes){
+			//初始化节点
+			for (T node : nodes) {
+				add(node);
+			}
 		}
 	}
 
@@ -39,12 +43,15 @@ public class ConsistentHash<T> {
 	 * @param numberOfReplicas 复制的节点个数，增加每个节点的复制节点有利于负载均衡
 	 * @param nodes 节点对象
 	 */
-	public ConsistentHash(HashAlgorithmEnum hashFunc, int numberOfReplicas, Collection<T> nodes) {
+	public ConsistentHash(HashAlgorithmEnum cacheServerHashFunc,HashAlgorithmEnum cacheObjHashFunc, int numberOfReplicas, Collection<T> nodes) {
 		this.numberOfReplicas = numberOfReplicas;
-		this.hashFunc = hashFunc;
-		//初始化节点
-		for (T node : nodes) {
-			add(node);
+		this.cacheServerHashFunc = cacheServerHashFunc;
+		this.cacheObjHashFunc = cacheObjHashFunc ;
+		if(null!=nodes){
+			//初始化节点
+			for (T node : nodes) {
+				add(node);
+			}
 		}
 	}
 
@@ -57,7 +64,7 @@ public class ConsistentHash<T> {
 	 */
 	public void add(T node) {
 		for (int i = 0; i < numberOfReplicas; i++) {
-			circle.put(hashFunc.hash(node.toString() + "-" + i), node);
+			circle.put(cacheServerHashFunc.hash(node.toString() + "-" + i), node);
 		}
 	}
 
@@ -67,7 +74,7 @@ public class ConsistentHash<T> {
 	 */
 	public void remove(T node) {
 		for (int i = 0; i < numberOfReplicas; i++) {
-			circle.remove(hashFunc.hash(node.toString() + "-" + i));
+			circle.remove(cacheServerHashFunc.hash(node.toString() + "-" + i));
 		}
 	}
 
@@ -80,7 +87,7 @@ public class ConsistentHash<T> {
 		if (circle.isEmpty()) {
 			return null;
 		}
-		int hash = hashFunc.hash(key);
+		int hash = cacheObjHashFunc.hash(key);
 		if (!circle.containsKey(hash)) {
 			SortedMap<Integer, T> tailMap = circle.tailMap(hash);	//返回此映射的部分视图，其键大于等于 hash
 			hash = tailMap.isEmpty() ? circle.firstKey() : tailMap.firstKey();
