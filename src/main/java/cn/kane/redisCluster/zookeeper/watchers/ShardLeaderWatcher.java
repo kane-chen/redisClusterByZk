@@ -63,7 +63,7 @@ public class ShardLeaderWatcher extends LeaderWatcher {
 
 	private boolean tryToBeGroupLeader(String leaderPath)throws KeeperException, InterruptedException {
 		LOG.info("[ToBeLeader]-start " + nodeName);
-		zkClient.create(leaderPath, nodeName.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+		zkClient.create(leaderPath, node.getNodeKey().getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 		LOG.info("[ToBeLeader]-[NEW] i am leader " + nodeName);
 		return true;
 	}
@@ -71,7 +71,7 @@ public class ShardLeaderWatcher extends LeaderWatcher {
 	@Override
 	public void addNextWacther() {
 		GroupLeaderWatcher livingNodesWatcher = new GroupLeaderWatcher(zkClient,nodeName ) ;
-		livingNodesWatcher.addWatcher(node.getGroup().getLivingDataNode()) ;
+		livingNodesWatcher.addWatcher(node.getGroup().getGroupPath()) ;
 	}
 
 }

@@ -7,7 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import cn.kane.redisCluster.node.NodeRunningInfos;
+import cn.kane.redisCluster.infos.NodeRunningInfos;
 
 public class ShardInfo implements Serializable{
 
@@ -58,6 +58,10 @@ public class ShardInfo implements Serializable{
 
 	public List<String> getShardFollowerNodeName() {
 		return shardFollowerNodeName;
+	}
+	
+	public void setShardFollowerNodeName(List<String> shardFollowerNodeName) {
+		this.shardFollowerNodeName = shardFollowerNodeName ;
 	}
 	
 	@Override

@@ -9,7 +9,7 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
-import cn.kane.redisCluster.node.NodeRunningInfos;
+import cn.kane.redisCluster.infos.NodeRunningInfos;
 import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
 
 public class ShardProposerWatcher extends LeaderWatcher {

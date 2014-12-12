@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
+import cn.kane.redisCluster.infos.NodeRunningInfos;
 import cn.kane.redisCluster.zookeeper.nodes.GroupInfo;
 import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
 import cn.kane.redisCluster.zookeeper.nodes.ShardInfo;
@@ -76,7 +77,7 @@ public class NodeFactory {
 		String shardPath = shard.getShardPath() ;
 		// shard-root path
 		if (null == zkClient.exists(shardPath, null)) {
-			zkClient.create(shardPath, shardName.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			zkClient.create(shardPath, shard.getShardKey().getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 			//shard-mapping
 		}
 		NodeRunningInfos.getInstance().addShard(shard);

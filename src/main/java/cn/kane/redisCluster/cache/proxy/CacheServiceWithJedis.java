@@ -2,7 +2,7 @@ package cn.kane.redisCluster.cache.proxy;
 
 import java.util.Map;
 
-import cn.kane.redisCluster.node.NodeRunningInfos;
+import cn.kane.redisCluster.infos.NodeRunningInfos;
 import redis.clients.jedis.Jedis;
 
 public class CacheServiceWithJedis implements ICacheService{

@@ -1,4 +1,4 @@
-package cn.kane.redisCluster.node;
+package cn.kane.redisCluster.infos;
 
 import java.util.List;
 import java.util.Map;
@@ -59,16 +59,39 @@ public class NodeRunningInfos {
 		}
 	}
 	
+	public void removeShard(String shardKey){
+		LOG.info("[RunInfos] remove shard : {}",shardKey);
+		ShardInfo shard = shardInfos.get(shardKey) ;
+		List<String> nodeKeyList = shard.getShardFollowerNodeName() ;
+		if(null!=nodeKeyList){
+			for(String nodeKey : nodeKeyList){
+				this.removeNode(nodeKey);
+			}
+		}
+		shardInfos.remove(shardKey) ;
+	}
+	
 	public void addNode(NodeInfo node){
+		LOG.info("[RunInfos] add node : {}",node);
 		if(nodeInfos.containsKey(node.getNodeKey())){
 			throw new IllegalArgumentException("some node with the same nodeKey,please check&resolve!");
 		}
 		nodeInfos.put(node.getNodeKey(), node);
 	}
 	
+	public void removeNode(String nodeKey){
+		LOG.info("[RunInfos] remove node : {}",nodeKey);
+		nodeInfos.remove(nodeKey) ;
+	}
+	
+	public ShardInfo getShardByKey(String shardKey){
+		return shardInfos.get(shardKey) ;
+	}
+	
 	public NodeInfo getNodeInfoByKey(String nodeKey){
 		return nodeInfos.get(nodeKey) ;
 	}
+	
 	/**
 	 * find targetCacheServer by cacheObj
 	 * @param cacheObj
@@ -102,4 +125,5 @@ public class NodeRunningInfos {
 	public void printShardInfos(){
 		LOG.info(String.format("[Shard-Infos]:%s",consistentCircle.getNodeHashDesc()));
 	}
+
 }

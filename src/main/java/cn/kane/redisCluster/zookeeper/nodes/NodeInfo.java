@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.cache.monitor.CacheMonitorRunnable;
-import cn.kane.redisCluster.node.NodeRunningInfos;
+import cn.kane.redisCluster.infos.NodeRunningInfos;
 import cn.kane.redisCluster.zookeeper.watchers.LogBaseWatcher;
 import cn.kane.redisCluster.zookeeper.watchers.ShardProposerWatcher;
 
