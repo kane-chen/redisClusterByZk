@@ -1,7 +1,7 @@
 package cn.kane.redisCluster.zookeeper.watchers;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -82,16 +82,18 @@ public class ShardProposerWatcher extends LeaderWatcher {
 
 	private void slaveOfMaster(String shardMaster){
 		Map<String,Object> masterCacheInfo = null ;
-		NodeInfo masterNode = NodeRunningInfos.getNodeInfoByKey(node.getNodeKey()) ;
+		NodeInfo masterNode = NodeRunningInfos.getInstance().getNodeInfoByKey(shardMaster) ;
 		if(null!=masterNode){
 			masterCacheInfo = masterNode.getCacheConnInfo() ;
 		}
-		if(!node.getNodeKey().equals(shardMaster)|| !node.getCacheConnInfo().equals(masterCacheInfo)){
+		LOG.info(String.format("[Slave]slaveOfMaster master=%s,masterCache=%s,slaveNode=%s,slaveCache=%s",
+				shardMaster,masterCacheInfo,node.getNodeKey(),node.getCacheConnInfo().equals(masterCacheInfo) ));
+		if(!node.getNodeKey().equals(shardMaster) && !node.getCacheConnInfo().equals(masterCacheInfo)){
 			String masterHost = (String)masterCacheInfo.get("ip") ;
 			int masterPort = (Integer)masterCacheInfo.get("port") ;
 			cacheMan.slaveOf(masterHost, masterPort);
 			//add to slaves
-			Set<String> slaves = node.getShard().getShardFollowerNodeName() ;
+			List<String> slaves = node.getShard().getShardFollowerNodeName() ;
 			if(!slaves.contains(node.getNodeKey())){
 				slaves.add(node.getNodeKey()) ;
 			}

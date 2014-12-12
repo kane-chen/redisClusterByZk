@@ -78,8 +78,8 @@ public class NodeFactory {
 		if (null == zkClient.exists(shardPath, null)) {
 			zkClient.create(shardPath, shardName.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 			//shard-mapping
-			NodeRunningInfos.addShard(shard);
 		}
+		NodeRunningInfos.getInstance().addShard(shard);
 		return shard ;
 	}
 	private NodeInfo createNode(String nodeName,GroupInfo group,ShardInfo shard,ZooKeeper zkClient,ICacheManageInterface cacheMan,NodeConfig nodeConfig) throws KeeperException, InterruptedException{
@@ -88,7 +88,7 @@ public class NodeFactory {
 		NodeInfo node = new NodeInfo(nodeName,group,shard,zkClient,zkConnStr,zkSessionTimeout,cacheMan);
 		node.build();
 		//shard-mapping
-		NodeRunningInfos.addNode(node);
+		NodeRunningInfos.getInstance().addNode(node);
 		return node ;
 	}
 

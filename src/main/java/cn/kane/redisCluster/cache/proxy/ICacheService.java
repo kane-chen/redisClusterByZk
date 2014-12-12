@@ -5,6 +5,7 @@ package cn.kane.redisCluster.cache.proxy;
  * @author kane
  *
  */
+//TODO more interfaces
 public interface ICacheService {
 
 	void put(String key,String value) ;

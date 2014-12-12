@@ -19,7 +19,7 @@ public class GroupInfo implements Serializable{
 	
 	public GroupInfo(String groupName){
 		this.groupName = groupName ;
-		this.groupPath = "/" + groupPath  ;
+		this.groupPath = "/" + groupName  ;
 		this.groupLeaderPath = this.groupPath + ZkNodeConstant.LEADER_NODE ;
 		this.childsRootPath = this.groupPath + ZkNodeConstant.CHILDREN_PATH ;
 		this.livingDataNode = this.groupPath + ZkNodeConstant.LIVEINGS_DATAS_NODE ;

@@ -33,12 +33,36 @@
 		<property name="cachePort" value="6380"/>
 		<property name="cacheTimeout" value="3000"/>
 	</bean>
+
+	<bean id="config3" class="cn.kane.redisCluster.node.NodeConfig" init-method="init4Test">
+		<property name="groupName" value="group1"/>
+		<property name="shardName" value="shard2"/>
+		<property name="nodeName" value="node3"/>
+		<property name="zkConnStr" value="127.0.0.1:2181"/>
+		<property name="zkSessionTimeOut" value="3000"/>
+		<property name="cacheHost" value="127.0.0.1"/>
+		<property name="cachePort" value="6381"/>
+		<property name="cacheTimeout" value="3000"/>
+	</bean>
+
+	<bean id="config4" class="cn.kane.redisCluster.node.NodeConfig" init-method="init4Test">
+		<property name="groupName" value="group1"/>
+		<property name="shardName" value="shard3"/>
+		<property name="nodeName" value="node4"/>
+		<property name="zkConnStr" value="127.0.0.1:2181"/>
+		<property name="zkSessionTimeOut" value="3000"/>
+		<property name="cacheHost" value="127.0.0.1"/>
+		<property name="cachePort" value="6382"/>
+		<property name="cacheTimeout" value="3000"/>
+	</bean>
     
     <bean id="nodeFactory" class="cn.kane.redisCluster.node.NodeFactory" init-method="startup">
     	<property name="nodeConfigs">
     		<list>
     			<ref bean="config1"/>
     			<ref bean="config2"/>
+    			<ref bean="config3"/>
+    			<ref bean="config4"/>
     		</list>
     	</property>
     </bean>

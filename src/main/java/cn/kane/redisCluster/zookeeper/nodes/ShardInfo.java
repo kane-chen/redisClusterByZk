@@ -1,8 +1,8 @@
 package cn.kane.redisCluster.zookeeper.nodes;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -18,7 +18,7 @@ public class ShardInfo implements Serializable{
 	private String shardPath ;
 	private String shardLeaderPath ;
 	private String shardLeaderNodeName ;
-	private Set<String> shardFollowerNodeName ;
+	private List<String> shardFollowerNodeName ;
 	
 	public ShardInfo(String shardName,GroupInfo group){
 		this.group = group ;
@@ -26,7 +26,7 @@ public class ShardInfo implements Serializable{
 		this.shardKey = group.getGroupName() + NodeRunningInfos.NODE_INFO_KEY_SPLITOR + shardName ;
 		this.shardPath = group.getGroupPath() + "/" + shardName ;
 		this.shardLeaderPath = this.shardPath + ZkNodeConstant.LEADER_NODE ;
-		shardFollowerNodeName = new HashSet<String>() ;
+		shardFollowerNodeName = new CopyOnWriteArrayList<String>() ;
 	}
 	
 	public String getShardName() {
@@ -56,7 +56,7 @@ public class ShardInfo implements Serializable{
 		this.shardLeaderNodeName = shardLeaderNodeName;
 	}
 
-	public Set<String> getShardFollowerNodeName() {
+	public List<String> getShardFollowerNodeName() {
 		return shardFollowerNodeName;
 	}
 	
