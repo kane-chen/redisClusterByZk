@@ -1,4 +1,4 @@
-package cn.kane.redisCluster.jedis;
+package cn.kane.redisCluster.agent;
 
 import redis.clients.jedis.Jedis;
 

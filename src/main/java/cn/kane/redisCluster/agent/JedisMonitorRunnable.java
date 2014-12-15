@@ -3,8 +3,6 @@ package cn.kane.redisCluster.agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.kane.redisCluster.jedis.JedisClient;
-
 /**
  * replace with CacheMonitorRunnable
  * @author chenqingxiang
