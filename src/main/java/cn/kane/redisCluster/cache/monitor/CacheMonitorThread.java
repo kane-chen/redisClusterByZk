@@ -1,29 +1,40 @@
 package cn.kane.redisCluster.cache.monitor;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
 
-public class CacheMonitorRunnable implements Runnable {
+public class CacheMonitorThread extends Thread {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(CacheMonitorRunnable.class) ;
+	private static final Logger LOG = LoggerFactory.getLogger(CacheMonitorThread.class) ;
 	//constant
 	private final static Long MONITOR_INTERRAL = 20000L;
 	private final static int MONITOR_MAX_FAIL_TIMES = 3;
+	/* instance */
 	private ICacheManageInterface cacheMan;
 	private NodeInfo nodeInfo ;
-
-	public CacheMonitorRunnable(ICacheManageInterface cacheMan,NodeInfo nodeInfo) {
+	/* running flag */
+	private AtomicBoolean isWorking = new AtomicBoolean(true) ;
+	
+	public CacheMonitorThread(ICacheManageInterface cacheMan,NodeInfo nodeInfo) {
 		this.cacheMan = cacheMan ;
 		this.nodeInfo = nodeInfo ;
 	}
+	public CacheMonitorThread(ICacheManageInterface cacheMan,NodeInfo nodeInfo,String thrName) {
+		this.cacheMan = cacheMan ;
+		this.nodeInfo = nodeInfo ;
+		this.setName(thrName);
+	}
 
+	@Override
 	public void run() {
 		long lastRunMillis = 0L;
 		int failTimes = 0;
-		while (true) {
+		while (isWorking.get()) {
 			long curMillis = System.currentTimeMillis();
 			if (curMillis - lastRunMillis > MONITOR_INTERRAL) {
 				lastRunMillis = curMillis;
@@ -69,6 +80,12 @@ public class CacheMonitorRunnable implements Runnable {
 				// do nothing,recycle
 			}
 		}
+	}
+	
+	public void shutdown(){
+		LOG.info("[Monitor] stop {}",cacheMan.cacheServerInfo());
+		this.isWorking.set(false);
+		LOG.info("[Monitor] stop done {}",cacheMan.cacheServerInfo());
 	}
 
 }

@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
-import cn.kane.redisCluster.cache.monitor.CacheMonitorRunnable;
+import cn.kane.redisCluster.cache.monitor.CacheMonitorThread;
 import cn.kane.redisCluster.infos.NodeRunningInfos;
 import cn.kane.redisCluster.zookeeper.watchers.LogBaseWatcher;
 import cn.kane.redisCluster.zookeeper.watchers.ShardProposerWatcher;
@@ -42,7 +42,9 @@ public class NodeInfo implements Serializable{
 	private String zkConnStr ;
 	private int zkSessionTimeout ;
 	private ICacheManageInterface cacheMan ;
+	
 	private AtomicBoolean isWorking = new AtomicBoolean(false) ;
+	private CacheMonitorThread monitorThr ;
 	
 	public NodeInfo(String nodeName,GroupInfo group,ShardInfo shard,ZooKeeper zkClient,String zkConnStr,int zkSessionTimeout,ICacheManageInterface cacheMan){
 		this.nodeName = nodeName ;
@@ -67,8 +69,15 @@ public class NodeInfo implements Serializable{
 		//registry
 		this.reg();
 		//monitor
-		Runnable monitor = new CacheMonitorRunnable(cacheMan,this) ;
-		new Thread(monitor,nodeName+"-monitor").start();
+		monitorThr = new CacheMonitorThread(cacheMan,this,nodeKey+"-monitor");
+		monitorThr.start() ;
+		//infos
+		NodeRunningInfos.getInstance().addNode(this);
+	}
+	
+	public void destroy() throws InterruptedException{
+		this.unReg();
+		monitorThr.shutdown();
 	}
 	
 	public void reg() throws KeeperException, InterruptedException{
@@ -119,9 +128,9 @@ public class NodeInfo implements Serializable{
 	
 	public void unReg() throws InterruptedException{
 		LOG.info(String.format("[Node] unreg [%s]",this));
-		//TODO delete datas
 		zkClient.close();
 		isWorking.set(false);
+		NodeRunningInfos.getInstance().removeNode(nodeKey);
 		LOG.info(String.format("[Node] unreg done [%s]",this));
 	}
 	

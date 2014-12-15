@@ -32,16 +32,28 @@ public class NodeFactory {
 		//node initialing
 		for(NodeConfig nodeConfig : nodeConfigs){
 			try{
-				NodeInfo nodeInfo = this.createNode(nodeConfig);
-				LOG.info(String.format("[Node]created: %s", nodeInfo));
+				this.addNode(nodeConfig);
 			}catch(Exception e){
 				LOG.error(String.format("[NodeFactory]create-node-error:%s",nodeConfig),e);
 			}
 		}
 	}
 	
+	public void addNode(NodeConfig nodeConf) throws KeeperException, InterruptedException{
+		LOG.info("[Node] addNode:{}",nodeConf);
+		NodeInfo nodeInfo = this.createNode(nodeConf) ;
+		LOG.info("[Node] addNode done:{}",nodeInfo);
+	}
+	
+	public void removeNode(String nodeKey) throws InterruptedException{
+		LOG.info("[Node] removeNode:{}",nodeKey);
+		NodeInfo nodeInfo = NodeRunningInfos.getInstance().getNodeInfoByKey(nodeKey) ;
+		nodeInfo.destroy();
+		LOG.info("[Node] removeNode done:{}",nodeKey);
+	}
+	
 	//create Node entrance
-	public NodeInfo createNode(NodeConfig nodeConfig) throws KeeperException, InterruptedException{
+	private NodeInfo createNode(NodeConfig nodeConfig) throws KeeperException, InterruptedException{
 		String groupName = nodeConfig.getGroupName();
 		String shardName = nodeConfig.getShardName();
 		String nodeName = nodeConfig.getNodeName();
@@ -78,7 +90,6 @@ public class NodeFactory {
 		// shard-root path
 		if (null == zkClient.exists(shardPath, null)) {
 			zkClient.create(shardPath, shard.getShardKey().getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-			//shard-mapping
 		}
 		NodeRunningInfos.getInstance().addShard(shard);
 		return shard ;
@@ -88,8 +99,6 @@ public class NodeFactory {
 		int zkSessionTimeout = nodeConfig.getZkSessionTimeOut() ;
 		NodeInfo node = new NodeInfo(nodeName,group,shard,zkClient,zkConnStr,zkSessionTimeout,cacheMan);
 		node.build();
-		//shard-mapping
-		NodeRunningInfos.getInstance().addNode(node);
 		return node ;
 	}
 
