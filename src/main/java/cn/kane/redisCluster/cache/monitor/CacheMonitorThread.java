@@ -15,18 +15,18 @@ public class CacheMonitorThread extends Thread {
 	private final static Long MONITOR_INTERRAL = 20000L;
 	private final static int MONITOR_MAX_FAIL_TIMES = 3;
 	/* instance */
-	private ICacheManageInterface cacheMan;
+	private ICacheManageInterface<?> cacheMan;
 	private NodeInfo nodeInfo ;
 	/* running flag */
 	private AtomicBoolean isWorking = new AtomicBoolean(true) ;
 	
-	public CacheMonitorThread(ICacheManageInterface cacheMan,NodeInfo nodeInfo) {
-		this.cacheMan = cacheMan ;
+	public CacheMonitorThread(NodeInfo nodeInfo) {
 		this.nodeInfo = nodeInfo ;
+		this.cacheMan = nodeInfo.getCacheMan() ;
 	}
-	public CacheMonitorThread(ICacheManageInterface cacheMan,NodeInfo nodeInfo,String thrName) {
-		this.cacheMan = cacheMan ;
+	public CacheMonitorThread(NodeInfo nodeInfo,String thrName) {
 		this.nodeInfo = nodeInfo ;
+		this.cacheMan = nodeInfo.getCacheMan() ;
 		this.setName(thrName);
 	}
 

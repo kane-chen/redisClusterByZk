@@ -43,8 +43,8 @@ public class CacheServiceInLocalMem implements ICacheService {
 	}
 
 	private Map<String,String> getTargetCacheServerWithKey(String key,int opType){
-		Map<String,Object> cacheServerInfo = NodeRunningInfos.getInstance().getCacheServerByHash(key,opType) ;
-		String memMappingKey = cacheServerInfo.toString() ;
+		Object cacheTemplate = NodeRunningInfos.getInstance().getCacheServerByHash(key,opType) ;
+		String memMappingKey = cacheTemplate.toString() ;
 		Map<String,String> cacheInMem = null ;
 		if(cacheMapping.containsKey(memMappingKey)){
 			cacheInMem = cacheMapping.get(memMappingKey) ;

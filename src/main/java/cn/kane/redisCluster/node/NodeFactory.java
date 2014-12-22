@@ -9,7 +9,6 @@ import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.infos.NodeRunningInfos;
 import cn.kane.redisCluster.zookeeper.nodes.GroupInfo;
 import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
@@ -58,10 +57,9 @@ public class NodeFactory {
 		String shardName = nodeConfig.getShardName();
 		String nodeName = nodeConfig.getNodeName();
 		ZooKeeper zkClient = nodeConfig.getZkClient();
-		ICacheManageInterface cacheMan = nodeConfig.getCacheMan() ;
 		GroupInfo group = this.createGroup(groupName, zkClient) ;
 		ShardInfo shard = this.createShard(shardName, group, zkClient);
-		NodeInfo node = this.createNode(nodeName, group, shard, zkClient,cacheMan,nodeConfig) ;
+		NodeInfo node = this.createNode(nodeName, group, shard, zkClient,nodeConfig) ;
 		return node ;
 	}
 	
@@ -94,10 +92,8 @@ public class NodeFactory {
 		NodeRunningInfos.getInstance().addShard(shard);
 		return shard ;
 	}
-	private NodeInfo createNode(String nodeName,GroupInfo group,ShardInfo shard,ZooKeeper zkClient,ICacheManageInterface cacheMan,NodeConfig nodeConfig) throws KeeperException, InterruptedException{
-		String zkConnStr = nodeConfig.getZkConnStr() ;
-		int zkSessionTimeout = nodeConfig.getZkSessionTimeOut() ;
-		NodeInfo node = new NodeInfo(nodeName,group,shard,zkClient,zkConnStr,zkSessionTimeout,cacheMan);
+	private NodeInfo createNode(String nodeName,GroupInfo group,ShardInfo shard,ZooKeeper zkClient,NodeConfig nodeConfig) throws KeeperException, InterruptedException{
+		NodeInfo node = new NodeInfo(nodeConfig,group,shard,zkClient);
 		node.build();
 		return node ;
 	}

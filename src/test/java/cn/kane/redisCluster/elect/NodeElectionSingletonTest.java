@@ -49,7 +49,7 @@ public class NodeElectionSingletonTest extends TestCase {
 		String host = "192.168.56.15";
 		int port = 6381 ;
 		int timeOut = 5000;
-		ICacheManageInterface jedisClient = new JedisCacheManageService(host,port,timeOut);
+		ICacheManageInterface<?> jedisClient = new JedisCacheManageService(host,port,timeOut);
 		Assert.assertEquals("PONG",jedisClient.ping());
 	}
 }

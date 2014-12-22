@@ -167,7 +167,7 @@ public class LeaderElectionNode4Alltry {
 		private String host ;
 		private int port ;
 		private int timeOut ;
-		private ICacheManageInterface jedisClient ;
+		private ICacheManageInterface<?> jedisClient ;
 		private final Long JEDIS_MONITOR_INTERRAL = 3000L ;
 		private final int JEDIS_MONITOR_MAX_FAIL_TIMES = 3 ;
 		public JedisMonitorRunnable(String host,int port,int timeOut){

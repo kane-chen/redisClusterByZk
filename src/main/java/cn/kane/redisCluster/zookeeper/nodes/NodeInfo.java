@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.cache.monitor.CacheMonitorThread;
 import cn.kane.redisCluster.infos.NodeRunningInfos;
+import cn.kane.redisCluster.node.NodeConfig;
 import cn.kane.redisCluster.zookeeper.watchers.LogBaseWatcher;
 import cn.kane.redisCluster.zookeeper.watchers.ShardProposerWatcher;
 
@@ -41,20 +42,20 @@ public class NodeInfo implements Serializable{
 	private ZooKeeper zkClient ;
 	private String zkConnStr ;
 	private int zkSessionTimeout ;
-	private ICacheManageInterface cacheMan ;
+	private ICacheManageInterface<?> cacheMan ;
 	
 	private AtomicBoolean isWorking = new AtomicBoolean(false) ;
 	private CacheMonitorThread monitorThr ;
 	
-	public NodeInfo(String nodeName,GroupInfo group,ShardInfo shard,ZooKeeper zkClient,String zkConnStr,int zkSessionTimeout,ICacheManageInterface cacheMan){
-		this.nodeName = nodeName ;
+	public NodeInfo(NodeConfig nodeConf,GroupInfo group,ShardInfo shard,ZooKeeper zkClient){
+		this.nodeName = nodeConf.getNodeName() ;
 		this.nodeKey = shard.getShardKey() + NodeRunningInfos.NODE_INFO_KEY_SPLITOR + nodeName ;
 		this.shard = shard ;
 		this.group = group ;
 		this.zkClient = zkClient ;
-		this.zkConnStr = zkConnStr ;
-		this.zkSessionTimeout = zkSessionTimeout ;
-		this.cacheMan = cacheMan ;
+		this.zkConnStr = nodeConf.getZkConnStr() ;
+		this.zkSessionTimeout = nodeConf.getZkSessionTimeOut() ;
+		this.cacheMan = nodeConf.getCacheMan() ;
 	}
 	
 	public boolean isWorking(){
@@ -69,7 +70,7 @@ public class NodeInfo implements Serializable{
 		//registry
 		this.reg();
 		//monitor
-		monitorThr = new CacheMonitorThread(cacheMan,this,nodeKey+"-monitor");
+		monitorThr = new CacheMonitorThread(this,nodeKey+"-monitor");
 		monitorThr.start() ;
 		//infos
 		NodeRunningInfos.getInstance().addNode(this);
@@ -81,7 +82,7 @@ public class NodeInfo implements Serializable{
 	}
 	
 	public void reg() throws KeeperException, InterruptedException{
-		//check cache-conn
+		//TODO check cache-conn(rem)
 		if(!"OK".equals(cacheMan.ping())){
 			LOG.warn(String.format("[Cache] ping failed [%s] ", cacheMan));
 			return ;
@@ -101,7 +102,7 @@ public class NodeInfo implements Serializable{
 						nodeName.getBytes(), ZooDefs.Ids.READ_ACL_UNSAFE,CreateMode.EPHEMERAL_SEQUENTIAL);
 				LOG.info(String.format("[Node] created [%s]",nodePath));
 				//add-watcher
-				ShardProposerWatcher shardLeaderWatcher = new ShardProposerWatcher(zkClient,cacheMan,this);
+				ShardProposerWatcher shardLeaderWatcher = new ShardProposerWatcher(zkClient,this);
 				shardLeaderWatcher.addWatcher(shard.getShardLeaderPath());
 				isWorking.set(true);
 				return ;
@@ -148,7 +149,6 @@ public class NodeInfo implements Serializable{
 		return cacheConnInfo ;
 	}
 	
-
 	public String getNodeName() {
 		return nodeName;
 	}
@@ -175,6 +175,9 @@ public class NodeInfo implements Serializable{
 	}
 	public ShardInfo getShard() {
 		return shard;
+	}
+	public ICacheManageInterface<?> getCacheMan(){
+		return this.cacheMan ;
 	}
 
 	@Override

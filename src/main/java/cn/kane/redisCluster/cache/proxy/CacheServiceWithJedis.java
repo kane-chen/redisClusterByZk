@@ -1,43 +1,43 @@
 package cn.kane.redisCluster.cache.proxy;
 
-import java.util.Map;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import cn.kane.redisCluster.infos.NodeRunningInfos;
-import redis.clients.jedis.Jedis;
 
 public class CacheServiceWithJedis implements ICacheService{
 
 	@Override
 	public void put(String key, String value) {
 		if(null!=value){
-			Jedis jedis = this.getTargetJedisWithKey(key,NodeRunningInfos.CACHE_OPERA_TYPE_MASTER) ;
-			jedis.set(key, value) ;
+			this.getTargetJedisWithKey(key,NodeRunningInfos.CACHE_OPERA_TYPE_MASTER).opsForValue().set(key, value);
 		}
 	}
 
 	@Override
 	public void put(String key, String value, long expiredMillis) {
 		if(null!=value){
-			Jedis jedis = this.getTargetJedisWithKey(key,NodeRunningInfos.CACHE_OPERA_TYPE_MASTER) ;
-			jedis.set(key, value,null,null,expiredMillis) ;
+			this.getTargetJedisWithKey(key,NodeRunningInfos.CACHE_OPERA_TYPE_MASTER).opsForValue().set(key, value,expiredMillis);
 		}
 	}
 
 	@Override
 	public String get(String key) {
-		return this.getTargetJedisWithKey(key,NodeRunningInfos.CACHE_OPERA_TYPE_MASTER).get(key) ;
+		Object result = this.getTargetJedisWithKey(key, NodeRunningInfos.CACHE_OPERA_TYPE_SLAVE).opsForValue().get(key) ;
+		return result.toString() ;
 	}
 
 	@Override
 	public void remove(String key) {
-		this.getTargetJedisWithKey(key,NodeRunningInfos.CACHE_OPERA_TYPE_MASTER).del(key) ;
+		this.getTargetJedisWithKey(key,NodeRunningInfos.CACHE_OPERA_TYPE_MASTER).delete(key);
 	}
 
-	private Jedis getTargetJedisWithKey(String key,int opType){
-		Map<String,Object> cacheServerInfo = NodeRunningInfos.getInstance().getCacheServerByHash(key,opType) ;
-		String host = (String)cacheServerInfo.get("host") ;
-		Integer port = (Integer)cacheServerInfo.get("port") ;
-		return new Jedis(host,port);
+	@SuppressWarnings("unchecked")
+	private RedisTemplate<String,Object> getTargetJedisWithKey(String key,int opType){
+		String nodeKey = NodeRunningInfos.getInstance().getCacheServerByHash(key,opType) ;
+		Object cacheTemplate = NodeRunningInfos.getInstance().getCacheManByNodeKey(nodeKey) ;
+		return (RedisTemplate<String,Object>)cacheTemplate;
 	}
+	
+	
 	
 }

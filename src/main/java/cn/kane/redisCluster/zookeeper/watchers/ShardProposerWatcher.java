@@ -15,13 +15,13 @@ import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
 public class ShardProposerWatcher extends LeaderWatcher {
 
 	private ZooKeeper zkClient;
-	private ICacheManageInterface cacheMan ;
+	private ICacheManageInterface<?> cacheMan ;
 	private String nodeName;
 	private NodeInfo node ;
 
-	public ShardProposerWatcher(ZooKeeper zkClient,ICacheManageInterface cacheMan,NodeInfo node) {
+	public ShardProposerWatcher(ZooKeeper zkClient,NodeInfo node) {
 		this.zkClient = zkClient;
-		this.cacheMan = cacheMan ;
+		this.cacheMan = node.getCacheMan() ;
 		this.node = node ;
 		String nodePath = node.getNodePath() ;
 		int startIndex = nodePath.lastIndexOf("/");

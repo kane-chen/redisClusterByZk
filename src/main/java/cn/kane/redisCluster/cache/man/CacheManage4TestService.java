@@ -3,7 +3,7 @@ package cn.kane.redisCluster.cache.man;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CacheManage4TestService implements ICacheManageInterface {
+public class CacheManage4TestService implements ICacheManageInterface<String> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CacheManage4TestService.class) ;
 
@@ -42,6 +42,11 @@ public class CacheManage4TestService implements ICacheManageInterface {
 	public String cacheServerInfo() {
 		String serverInfo = host+":"+port ;
 		return serverInfo;
+	}
+
+	@Override
+	public String getCacheTemplate() {
+		return this.cacheServerInfo() ;
 	}
 
 }

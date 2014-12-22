@@ -1,6 +1,6 @@
 package cn.kane.redisCluster.cache.man;
 
-public interface ICacheManageInterface {
+public interface ICacheManageInterface<T> {
 
 	/**
 	 * re-connect
@@ -31,5 +31,5 @@ public interface ICacheManageInterface {
 	 */
 	String cacheServerInfo();
 	
-	
+	T getCacheTemplate() ;
 }

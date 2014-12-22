@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.kane.redisCluster.cache.man.ICacheManageInterface;
 import cn.kane.redisCluster.hash.ConsistentHash;
 import cn.kane.redisCluster.hash.HashAlgorithmEnum;
 import cn.kane.redisCluster.zookeeper.nodes.NodeInfo;
@@ -27,6 +28,7 @@ public class NodeRunningInfos {
 	
 	//nodeInfos
 	private Map<String,NodeInfo> nodeInfos ;
+	private Map<String,ICacheManageInterface<?>> cacheManServices ;
 	//shardInfos
 	private Map<String,ShardInfo> shardInfos ;
 	//consistentCircle
@@ -34,6 +36,7 @@ public class NodeRunningInfos {
 
 	private NodeRunningInfos(){
 		nodeInfos = new ConcurrentHashMap<String, NodeInfo>() ;
+		cacheManServices = new ConcurrentHashMap<String, ICacheManageInterface<?>>() ;
 		shardInfos = new ConcurrentHashMap<String, ShardInfo>() ;
 		consistentCircle = new ConsistentHash<ShardInfo>(HashAlgorithmEnum.KETAMA_HASH,
 				HashAlgorithmEnum.FNV_HASH,ReplicasNumOfShard,null) ;
@@ -77,11 +80,13 @@ public class NodeRunningInfos {
 			throw new IllegalArgumentException("some node with the same nodeKey,please check&resolve!");
 		}
 		nodeInfos.put(node.getNodeKey(), node);
+		cacheManServices.put(node.getNodeKey(), node.getCacheMan()) ;
 	}
 	
 	public void removeNode(String nodeKey){
 		LOG.info("[RunInfos] remove node : {}",nodeKey);
 		nodeInfos.remove(nodeKey) ;
+		cacheManServices.remove(nodeKey) ;
 	}
 	
 	public ShardInfo getShardByKey(String shardKey){
@@ -98,10 +103,10 @@ public class NodeRunningInfos {
 	 * @param opType  0-master 1-single-slave
 	 * @return
 	 */
-	public  Map<String,Object> getCacheServerByHash(Object cacheObj,int opType){
+	public  String getCacheServerByHash(Object cacheObj,int opType){
 		ShardInfo targetShardInfo = consistentCircle.get(cacheObj) ;
 		String nodeKey = this.getNodeKeyOfCacheServer(targetShardInfo, opType) ;
-		return nodeInfos.get(nodeKey).getCacheConnInfo() ;
+		return nodeKey ;
 	}
 	
 	private String getNodeKeyOfCacheServer(ShardInfo targetShardInfo,int opType){
@@ -110,14 +115,18 @@ public class NodeRunningInfos {
 			nodeKey = targetShardInfo.getShardLeaderNodeName() ;
 		}else if(opType == CACHE_OPERA_TYPE_SLAVE){
 			List<String> nodeKeyList = targetShardInfo.getShardFollowerNodeName() ;
-			int slavePos = this.blancePos(nodeKey, nodeKeyList.size()) ;
+			int slavePos = this.dispatcherByKey(nodeKey, nodeKeyList.size()) ;
 			nodeKey = nodeKeyList.get(slavePos) ;
 		}
 		return nodeKey ;
 	}
 	
+	public Object getCacheManByNodeKey(String nodeKey){
+		return cacheManServices.get(nodeKey).getCacheTemplate() ;
+	}
+	
 	//TODO
-	private int blancePos(String nodeKey ,int totalSize){
+	private int dispatcherByKey(String nodeKey ,int totalSize){
 		Random random = new Random() ;
 		return random.nextInt(totalSize) ;
 	}

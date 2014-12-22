@@ -25,7 +25,7 @@ public class NodeConfig {
 	private int cacheTimeout ;
 	//create-instance
 	private ZooKeeper zkClient ;
-	private ICacheManageInterface cacheMan ;
+	private ICacheManageInterface<?> cacheMan ;
 	
 	public void init() throws IOException{
 		zkClient = new ZooKeeper(zkConnStr, zkSessionTimeOut, new LogBaseWatcher());
@@ -88,7 +88,7 @@ public class NodeConfig {
 	public ZooKeeper getZkClient() {
 		return zkClient;
 	}
-	public ICacheManageInterface getCacheMan() {
+	public ICacheManageInterface<?> getCacheMan() {
 		return cacheMan;
 	}
 	
